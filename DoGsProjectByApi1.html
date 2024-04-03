@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blur Div Overlay with Live Score</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: url('data image.jpg') no-repeat center/cover;
+            position: relative;
+        }
+
+        /* New div for background image */
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* background: url('another-background-image.jpg') no-repeat center/cover; */
+            z-index: -1;
+            /* Ensure it's behind other content */
+        }
+
+        .blur-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(20px);
+            /* Apply the blur effect */
+            /* border: 2px solid black; */
+            border-radius: 20px 50px 60px 10px;
+        }
+
+        /* Optional: Add content inside the overlay */
+        .overlay-content-wrapper {
+           
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            width: 80%;
+            /* Adjust width as needed */
+            max-height: 80%;
+            /* Set maximum height */
+            overflow-y: auto;
+            /* Enable vertical scrolling if needed */
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            /* Set a fixed width for each card */
+            text-align: center;
+        }
+
+        .card img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .overlay-content {
+            color: white;
+            font-size: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- New div for background image -->
+    <div class="background-image"></div>
+
+    <!-- Blur overlay div -->
+    <div class="blur-overlay"></div>
+
+    <!-- Optional: Content inside the overlay -->
+    <div class="overlay-content-wrapper" id="data-score">
+        <!-- Cards will be dynamically added here -->
+    </div>
+
+    <script>
+       
+
+
+
+        async function fetchData() {
+            try {
+                const apiKey = 'live_dLzQuPeStSA2QhhxqoIgSNJwgayaB6oWtGyUMsKMAOvoOS2rpsAEij4CcWQa3gGQ';
+                const response = await fetch('https://api.thedogapi.com/v1/breeds', {
+                    headers: {
+                        'x-api-key': apiKey
+                    }
+                });
+                const breeds = await response.json();
+
+                const liveScoreElement = document.getElementById('data-score');
+                liveScoreElement.innerHTML = '';
+
+                breeds.forEach(breed => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+
+                    const breedInfo = [
+                        `Name: ${breed.name}`,
+                        `Breed Group: ${breed.breed_group}`,
+                        `Life Span: ${breed.life_span}`,
+                        `Temperament: ${breed.temperament}`,
+                        `Origin: ${breed.origin || 'Unknown'}`
+                    ];
+
+                    const img = document.createElement('img');
+                    img.src = breed.image.url;
+                    img.alt = breed.name;
+
+                    card.appendChild(img);
+
+                    breedInfo.forEach(info => {
+                        const p = document.createElement('p');
+                        p.textContent = info;
+                        card.appendChild(p);
+                    });
+
+                    liveScoreElement.appendChild(card);
+
+                    gsap.from(card, { duration: 1, opacity: 0, y: 50, stagger: 0.2 });
+                });
+            } catch (error) {
+                console.error('Error fetching breed data:', error);
+                document.getElementById('data-score').textContent = 'Error fetching breed data';
+            }
+        }
+
+        // GSAP animation
+        gsap.to(".blur-overlay", { duration: 2, rotation: 360, ease: "bounce", onComplete: fetchData });
+
+    </script>
+</body>
+
+</html>
